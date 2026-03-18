@@ -1,0 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700;800&family=Fraunces:opsz,wght,SOFT@9..144,400..900,100&display=swap");
+@import "tailwindcss";
+
+:root {
+  --font-display: "Fraunces", "Times New Roman", serif;
+  --font-body: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --ink-strong: #2f2518;
+  --ink-soft: #6e5c47;
+  --line: #ead9c2;
+  --surface: #fffaf1;
+  --surface-strong: #ffffff;
+  --surface-warm: #fff0d8;
+  --accent: #dd6b20;
+  --accent-strong: #b45309;
+  --accent-soft: #ffedd1;
+  --mint: #2f8f7f;
+  --mint-soft: #d4f1e7;
+  --error: #be123c;
+  --error-soft: #ffe4e6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--ink-strong);
+  font-family: var(--font-body);
+  background:
+    radial-gradient(circle at 8% -10%, #ffe7bd 0, transparent 33%),
+    radial-gradient(circle at 92% 8%, #d6f2ea 0, transparent 29%),
+    linear-gradient(180deg, #fff8ec 0%, #fff4e2 45%, #fff7ef 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(221, 107, 32, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(221, 107, 32, 0.04) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at 50% 30%, black 50%, transparent 100%);
+}
+
+::selection {
+  background: rgba(221, 107, 32, 0.22);
+}
