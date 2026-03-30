@@ -28,7 +28,6 @@ export function JokeCard({
   const isLoggedIn = !!session?.user;
 
   const isVoteDisabled = isPending || !isLoggedIn;
-  const isDeleteDisabled = isPending || isDeleting || !isLoggedIn;
 
   return (
     <div
@@ -93,17 +92,18 @@ export function JokeCard({
                 <span>{joke.comments.length}</span>
               </button>
 
-              <button
-                type="button"
-                className="inline-flex cursor-pointer items-center gap-[0.28rem] rounded-full border border-[#efc7c7] bg-[#fff7f7] px-[0.52rem] py-[0.2rem] text-[0.76rem] font-bold text-[#8c2f2f] hover:border-[#e7a8a8] hover:bg-[#ffeded] disabled:cursor-not-allowed disabled:opacity-65"
-                onClick={() => onDelete(joke.id)}
-                aria-label="Delete joke"
-                disabled={isDeleteDisabled}
-                title={!isLoggedIn ? "Sign in to delete jokes" : undefined}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>{isDeleting ? "Deleting..." : "Delete"}</span>
-              </button>
+              {joke.isOwner ? (
+                <button
+                  type="button"
+                  className="inline-flex cursor-pointer items-center gap-[0.28rem] rounded-full border border-[#efc7c7] bg-[#fff7f7] px-[0.52rem] py-[0.2rem] text-[0.76rem] font-bold text-[#8c2f2f] hover:border-[#e7a8a8] hover:bg-[#ffeded] disabled:cursor-not-allowed disabled:opacity-65"
+                  onClick={() => onDelete(joke.id)}
+                  aria-label="Delete joke"
+                  disabled={isDeleting}
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>{isDeleting ? "Deleting..." : "Delete"}</span>
+                </button>
+              ) : null}
             </div>
           </div>
 

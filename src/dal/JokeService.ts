@@ -1,9 +1,4 @@
-import type {
-  CreateJokeInput,
-  DeleteJokeInput,
-  Joke,
-  VoteJokeInput,
-} from "#/types";
+import type { CreateJokeInput, DeleteJokeInput, Joke, VoteJokeInput } from "#/types";
 import { eq, sql } from "drizzle-orm";
 import type { DbClient } from "./db/client";
 import { commentsTable, jokesTable } from "./db/schema";
@@ -11,7 +6,7 @@ import { commentsTable, jokesTable } from "./db/schema";
 export class JokeService {
   constructor(private readonly db: DbClient) {}
 
-  async getJokes(): Promise<Joke[]> {
+  async getJokes(userId?: string): Promise<Joke[]> {
     const rows = await this.db.query.jokesTable.findMany({
       with: {
         comments: {
@@ -30,16 +25,18 @@ export class JokeService {
       answer: row.answer,
       score: row.score,
       comments: row.comments.map((comment) => comment.body),
+      isOwner: userId ? row.authorId === userId : false,
     }));
   }
 
-  async createJoke(input: CreateJokeInput): Promise<Joke> {
+  async createJoke(input: CreateJokeInput, authorId: string): Promise<Joke> {
     const [insertedJoke] = await this.db
       .insert(jokesTable)
       .values({
         question: input.question.trim(),
         answer: input.answer.trim(),
         score: 0,
+        authorId,
       })
       .returning({
         id: jokesTable.id,
@@ -52,10 +49,7 @@ export class JokeService {
       throw new Error("Failed to insert joke.");
     }
 
-    return {
-      ...insertedJoke,
-      comments: [],
-    };
+    return { ...insertedJoke, comments: [], isOwner: true };
   }
 
   async voteJoke(input: VoteJokeInput): Promise<Joke> {
@@ -84,23 +78,21 @@ export class JokeService {
       orderBy: (comment, { asc }) => [asc(comment.createdAt)],
     });
 
-    const updatedJoke = {
+    return {
       ...updatedJokeRow,
       comments: comments.map((comment) => comment.body),
+      isOwner: false,
     };
-
-    return updatedJoke;
   }
 
-  async deleteJoke(input: DeleteJokeInput): Promise<void> {
-    const result = await this.db
-      .delete(jokesTable)
-      .where(eq(jokesTable.id, input.id));
+  async deleteJoke(input: DeleteJokeInput, userId: string): Promise<void> {
+    const joke = await this.db.query.jokesTable.findFirst({
+      where: (t, { eq }) => eq(t.id, input.id),
+    });
 
-    const wasDeleted = Number(result.rowCount ?? 0) > 0;
+    if (!joke) throw new Error("Joke not found.");
+    if (joke.authorId !== userId) throw new Error("Not authorized.");
 
-    if (!wasDeleted) {
-      throw new Error("Joke not found.");
-    }
+    await this.db.delete(jokesTable).where(eq(jokesTable.id, input.id));
   }
 }
