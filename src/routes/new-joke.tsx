@@ -1,12 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-import {
-  createJokeMutation,
-  type CreateJokeMutationVariables,
-} from "#/queries";
+import { authClient } from "#/lib/auth-client";
+import { createJokeMutation, type CreateJokeMutationVariables } from "#/queries";
 import { createJoke } from "#/serverFunctions/jokeFns";
-import { useServerFn } from "@tanstack/react-start";
 import type { Joke } from "#/types";
+import { useMutation } from "@tanstack/react-query";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/new-joke")({
   component: NewJokePage,
@@ -14,6 +12,8 @@ export const Route = createFileRoute("/new-joke")({
 
 function NewJokePage() {
   const navigate = useNavigate();
+  const { data: session, isPending: isSessionLoading } = authClient.useSession();
+
   const createJokeServerFn = useServerFn(createJoke);
   const { mutateAsync, isPending, error, reset } = useMutation<
     Joke,
@@ -24,9 +24,7 @@ function NewJokePage() {
     mutationFn: createJokeServerFn,
   });
 
-  const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = async (
-    event,
-  ) => {
+  const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = async (event) => {
     event.preventDefault();
 
     const formData = new FormData(event.currentTarget);
@@ -48,6 +46,39 @@ function NewJokePage() {
     }
   };
 
+  // Prevent flicker while checking authentication
+  if (isSessionLoading) return null;
+
+  // If not signed in, show the required message and buttons on the left
+  if (!session) {
+    return (
+      <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-10 sm:pt-14">
+        <section className="rounded-[1.45rem] border border-(--line) bg-[radial-gradient(circle_at_92%_15%,rgba(47,143,127,0.16)_0,transparent_34%),linear-gradient(180deg,var(--surface-strong)_0%,#fff8ed_100%)] p-[clamp(1.1rem,3.1vw,1.9rem)] shadow-[0_18px_40px_rgba(137,91,33,0.1)] max-sm:rounded-[1.05rem]">
+          <h1 className="m-0 font-(--font-display) text-[clamp(1.9rem,5vw,2.6rem)] leading-[1.1]">
+            Sign in to add a joke
+          </h1>
+          <p className="mt-[0.65rem] text-(--ink-soft)">
+            Joke submission is available to signed in users only.
+          </p>
+          <div className="mt-8 flex justify-start gap-4">
+            <Link
+              to="/signin"
+              className="inline-flex cursor-pointer items-center rounded-[0.72rem] border-0 bg-[linear-gradient(180deg,#dd6b20_0%,#b45309_100%)] px-6 py-[0.62rem] font-[740] text-[#fffaf2] shadow-[0_10px_18px_rgba(180,83,9,0.24)]"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/signup"
+              className="inline-flex cursor-pointer items-center rounded-[0.72rem] border border-[#e2d7c4] bg-[#fffdfa] px-6 py-[0.62rem] font-[740] text-[#4f3f2e]"
+            >
+              Create Account
+            </Link>
+          </div>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="mx-auto w-full max-w-6xl px-4 pb-12 pt-10 sm:pt-14">
       <section className="rounded-[1.45rem] border border-(--line) bg-[radial-gradient(circle_at_92%_15%,rgba(47,143,127,0.16)_0,transparent_34%),linear-gradient(180deg,var(--surface-strong)_0%,#fff8ed_100%)] p-[clamp(1.1rem,3.1vw,1.9rem)] shadow-[0_18px_40px_rgba(137,91,33,0.1)] max-sm:rounded-[1.05rem]">
@@ -58,19 +89,13 @@ function NewJokePage() {
           Add a New Joke
         </h1>
         <p className="mt-[0.65rem] max-w-[54ch] text-(--ink-soft)">
-          Drop in a setup and punchline. Once it saves, you will be redirected
-          back to the collection.
+          Drop in a setup and punchline. Once it saves, you will be redirected back to the
+          collection.
         </p>
 
-        <form
-          onSubmit={handleSubmit}
-          className="mt-[1.2rem] grid max-w-2xl gap-[0.95rem]"
-        >
+        <form onSubmit={handleSubmit} className="mt-[1.2rem] grid max-w-2xl gap-[0.95rem]">
           <div>
-            <label
-              htmlFor="question"
-              className="mb-[0.35rem] block font-[640] text-[#4f3f2e]"
-            >
+            <label htmlFor="question" className="mb-[0.35rem] block font-[640] text-[#4f3f2e]">
               Setup
             </label>
             <input
@@ -83,10 +108,7 @@ function NewJokePage() {
           </div>
 
           <div>
-            <label
-              htmlFor="answer"
-              className="mb-[0.35rem] block font-[640] text-[#4f3f2e]"
-            >
+            <label htmlFor="answer" className="mb-[0.35rem] block font-[640] text-[#4f3f2e]">
               Punchline
             </label>
             <textarea
