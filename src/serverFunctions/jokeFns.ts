@@ -21,7 +21,10 @@ export const createJoke = createServerFn({ method: "POST" })
 export const voteJoke = createServerFn({ method: "POST" })
   .inputValidator((input: VoteJokeInput) => input)
   .handler(async ({ data, context }) => {
-    return context.jokeService.voteJoke(data);
+    const request = getRequest();
+    const session = await auth.api.getSession({ headers: request.headers });
+    if (!session?.user?.id) throw new Error("Not authenticated.");
+    return context.jokeService.voteJoke(data, session.user.id);
   });
 
 export const deleteJoke = createServerFn({ method: "POST" })
