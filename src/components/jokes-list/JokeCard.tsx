@@ -44,13 +44,15 @@ export function JokeCard({
         >
           <button
             type="button"
-            className="inline-flex h-[1.4rem] w-[1.4rem] cursor-pointer items-center justify-center rounded-[0.4rem] border-0 bg-transparent text-[#8a6942] hover:bg-[#f7ebd8] hover:text-[#5f472a] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent disabled:hover:text-[#8a6942]"
+            className={`inline-flex h-[1.4rem] w-[1.4rem] cursor-pointer items-center justify-center rounded-[0.4rem] border-0 bg-transparent transition-colors
+              ${joke.userVote === 1 ? "bg-[#f7ebd8] text-[#5f472a]" : "text-[#8a6942] hover:bg-[#f7ebd8] hover:text-[#5f472a]"}
+              disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent disabled:hover:text-[#8a6942]`}
             onClick={() => onVote(joke.id, 1)}
             aria-label="Upvote joke"
             disabled={isVoteDisabled}
             title={!isLoggedIn ? "Sign in to vote" : undefined}
           >
-            <ArrowBigUp className="h-4 w-4" />
+            <ArrowBigUp className={`h-4 w-4 ${joke.userVote === 1 ? "fill-current" : ""}`} />
           </button>
 
           <span className="min-w-[1.3rem] text-center text-[0.84rem] font-black text-[#5c4b35]">
@@ -59,13 +61,15 @@ export function JokeCard({
 
           <button
             type="button"
-            className="inline-flex h-[1.4rem] w-[1.4rem] cursor-pointer items-center justify-center rounded-[0.4rem] border-0 bg-transparent text-[#8a6942] hover:bg-[#f7ebd8] hover:text-[#5f472a] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent disabled:hover:text-[#8a6942]"
+            className={`inline-flex h-[1.4rem] w-[1.4rem] cursor-pointer items-center justify-center rounded-[0.4rem] border-0 bg-transparent transition-colors
+              ${joke.userVote === -1 ? "bg-[#f7ebd8] text-[#5f472a]" : "text-[#8a6942] hover:bg-[#f7ebd8] hover:text-[#5f472a]"}
+              disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent disabled:hover:text-[#8a6942]`}
             onClick={() => onVote(joke.id, -1)}
             aria-label="Downvote joke"
             disabled={isVoteDisabled}
             title={!isLoggedIn ? "Sign in to vote" : undefined}
           >
-            <ArrowBigDown className="h-4 w-4" />
+            <ArrowBigDown className={`h-4 w-4 ${joke.userVote === -1 ? "fill-current" : ""}`} />
           </button>
         </div>
 
