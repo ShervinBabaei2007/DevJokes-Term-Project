@@ -25,12 +25,7 @@ export function JokesList() {
         jokes={topJokes}
         {...controller}
       />
-      <JokesSection
-        title="More Jokes"
-        isTopJokes={false}
-        jokes={remainingJokes}
-        {...controller}
-      />
+      <JokesSection title="More Jokes" isTopJokes={false} jokes={remainingJokes} {...controller} />
     </div>
   );
 }
