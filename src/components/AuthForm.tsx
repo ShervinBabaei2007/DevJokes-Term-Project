@@ -1,4 +1,5 @@
 import { authClient } from "#/lib/auth-client";
+import { useQueryClient } from "@tanstack/react-query"; // Added
 import { Link, useRouter } from "@tanstack/react-router";
 import { useState, type SubmitEventHandler } from "react";
 
@@ -8,6 +9,7 @@ interface AuthFormProps {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
+  const queryClient = useQueryClient(); // Added
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,6 +44,13 @@ export function AuthForm({ mode }: AuthFormProps) {
           throw new Error(result.error.message || "Unable to sign in.");
         }
       }
+      /**
+       * CRITICAL FIXES FOR UI REFRESH (THIS FIXED the DELETE/VOTE not showing correctly):
+       * 1. Clear the TanStack Query cache so 'isOwner' and 'userVote' are refetched.
+       * 2. Invalidate the Router so 'beforeLoad' runs to get the fresh session.
+       */
+      await queryClient.invalidateQueries();
+      await router.invalidate();
 
       await router.navigate({ to: "/" });
     } catch (error) {
