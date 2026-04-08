@@ -1,15 +1,25 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { HomeHero } from "#/components/HomeHero";
 import { JokesList } from "#/components/JokesList";
 import { JokesListShimmer } from "#/components/JokesListShimmer";
-import { HomeHero } from "#/components/HomeHero";
-import { Suspense } from "react";
+import { getSession } from "#/lib/auth.functions";
 import { getJokesQuery } from "#/queries";
+import { createFileRoute } from "@tanstack/react-router";
+import { Suspense } from "react";
 
 export const Route = createFileRoute("/")({
-  component: App,
+  beforeLoad: async () => {
+    // We still fetch the session on the server for the hard-refresh fix
+    const session = await getSession();
+
+    // allows guests to stay on the page
+    return {
+      user: session?.user ?? null,
+    };
+  },
   loader: ({ context }) => {
     context.queryClient.prefetchQuery(getJokesQuery);
   },
+  component: App,
 });
 
 function App() {
