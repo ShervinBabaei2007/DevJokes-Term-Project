@@ -1,40 +1,32 @@
-import {
-  HeadContent,
-  Scripts,
-  createRootRouteWithContext,
-} from "@tanstack/react-router";
-import Footer from "../components/Footer";
+import type { auth } from "#/lib/auth";
 import type { QueryClient } from "@tanstack/react-query";
+import { createRootRouteWithContext, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import Footer from "../components/Footer";
 import Header from "../components/Header";
 import appCss from "../styles.css?url";
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
-  {
-    head: () => ({
-      meta: [
-        {
-          charSet: "utf-8",
-        },
-        {
-          name: "viewport",
-          content: "width=device-width, initial-scale=1",
-        },
-        {
-          title: "DevJokes",
-        },
-      ],
-      links: [
-        {
-          rel: "stylesheet",
-          href: appCss,
-        },
-      ],
-    }),
-    shellComponent: RootDocument,
-  },
-);
+// Extracting types from Better Auth
+type Session = typeof auth.$Infer.Session;
+type User = Session["user"];
 
-function RootDocument({ children }: { children: React.ReactNode }) {
+export interface MyRouterContext {
+  queryClient: QueryClient;
+  user: User | null;
+}
+
+export const Route = createRootRouteWithContext<MyRouterContext>()({
+  head: () => ({
+    meta: [
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { title: "DevJokes" },
+    ],
+    links: [{ rel: "stylesheet", href: appCss }],
+  }),
+  component: RootDocument,
+});
+
+function RootDocument() {
   return (
     <html lang="en">
       <head>
@@ -42,7 +34,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       </head>
       <body className="min-h-screen antialiased wrap-anywhere">
         <Header />
-        {children}
+        <Outlet />
         <Footer />
         <Scripts />
       </body>
