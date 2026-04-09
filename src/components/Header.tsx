@@ -24,6 +24,7 @@ export default function Header() {
 
   const handleSignOut = async () => {
     await authClient.signOut();
+    await router.invalidate();
     await router.navigate({ to: "/" });
   };
 
