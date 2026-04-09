@@ -1,4 +1,5 @@
 import { CommentsDrawer } from "#/components/CommentsDrawer";
+import { authClient } from "#/lib/auth-client";
 import type { Joke } from "#/types";
 import { getRouteApi } from "@tanstack/react-router";
 import { ArrowBigDown, ArrowBigUp, MessageCircle, Star, Trash2 } from "lucide-react";
@@ -26,11 +27,15 @@ export function JokeCard({
   onDelete,
   isDeleting,
 }: JokeCardProps) {
-  // Use context for the stable hard-refresh fix
-  const { user } = routeApi.useRouteContext();
+  // authClient.useSession() gives us a live, reactive session object.
+  // It updates immediately when the user signs in or out — no page refresh needed.
+  const { data: session } = authClient.useSession();
 
-  // If user is null (logged out), isLoggedIn is false
-  const isLoggedIn = !!user;
+  // Derive login state from the live session.
+  // If session.user is null (i.e. signed out), isLoggedIn becomes false instantly.
+  const isLoggedIn = !!session?.user;
+
+  // Voting is only allowed for signed-in users.
   const isVoteDisabled = !isLoggedIn;
 
   return (
@@ -100,7 +105,7 @@ export function JokeCard({
               </button>
 
               {/* isOwner logic remains the same; logged out users won't see this */}
-              {joke.isOwner && (
+              {joke.isOwner && isLoggedIn && (
                 <button
                   type="button"
                   className="inline-flex cursor-pointer items-center gap-[0.28rem] rounded-full border border-[#efc7c7] bg-[#fff7f7] px-[0.52rem] py-[0.2rem] text-[0.76rem] font-bold text-[#8c2f2f] hover:border-[#e7a8a8] hover:bg-[#ffeded] disabled:opacity-65"
